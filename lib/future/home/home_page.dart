@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:web_app_update/core/data/model/environment_model.dart';
 import 'package:web_app_update/core/data/repository/environment_repository.dart';
@@ -24,13 +25,19 @@ class _HomePageState extends State<HomePage> {
     final environmentRepository = context.read<EnvironmentRepository>();
     final environmentModel = await environmentRepository.loadEnvironmentVariables();
 
-    const warning = 'You could pass variables with\r\nenvironment.json or\r\n--dart-define for debug';
+    // You could pass variables with environment.json or --dart-define for debug
     _appEnvironment = (environmentModel.environment ??
-            const String.fromEnvironment(EnvironmentNames.appEnvironment, defaultValue: warning))
+            const String.fromEnvironment(EnvironmentNames.appEnvironment, defaultValue: 'unknown'))
         .toLowerCase();
 
-    _appVersion =
-        environmentModel.version ?? const String.fromEnvironment(EnvironmentNames.appVersion, defaultValue: warning);
+    final appVersion = environmentModel.version ?? const String.fromEnvironment(EnvironmentNames.appVersion);
+
+    if (appVersion.isNotEmpty) {
+      _appVersion = appVersion;
+    } else {
+      final packageInfo = await PackageInfo.fromPlatform();
+      _appVersion = '${packageInfo.version}b${packageInfo.buildNumber}${_appEnvironment![0]}';
+    }
 
     final updateCheckRepository = context.read<UpdateCheckRepository>();
     final newVersion = await updateCheckRepository.getNewVersion(_appEnvironment!);
