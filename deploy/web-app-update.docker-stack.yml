@@ -38,6 +38,9 @@ x-deploy: &deploy-app
   replicas: 1
   restart_policy:
     condition: on-failure
+  placement:
+    constraints:
+      - node.role==manager
   resources:
     limits:
       memory: 1024M
@@ -56,6 +59,8 @@ services:
     <<: *default-keys
     hostname: web-app-update
     image: zsdima/web-app-update:latest
+    ports:
+     - "8085:80"
     volumes:
       - /etc/localtime:/etc/localtime:ro
     environment:
