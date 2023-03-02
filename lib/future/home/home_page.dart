@@ -1,6 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, avoid_web_libraries_in_flutter
-
-import 'dart:html' as html;
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +32,13 @@ class _HomePageState extends State<HomePage> {
     _appVersion =
         environmentModel.version ?? const String.fromEnvironment(EnvironmentNames.appVersion, defaultValue: warning);
 
+    final updateCheckRepository = context.read<UpdateCheckRepository>();
+    final newVersion = await updateCheckRepository.getNewVersion(_appEnvironment!);
+
+    if (newVersion.isNotEmpty && _appVersion != newVersion) {
+      await updateCheckRepository.tryReloadApplication();
+    }
+
     return _appVersion!;
   }
 
@@ -49,9 +54,7 @@ class _HomePageState extends State<HomePage> {
             content: Text('New version available: $newVersion, press "Update" to install'),
             action: SnackBarAction(
               label: 'Update',
-              onPressed: () {
-                html.window.location.reload();
-              },
+              onPressed: updateCheckRepository.updateApplication,
             ),
           );
 

@@ -7,4 +7,8 @@ class UpdateCheckRepository {
       : _updateCheckApi = updateCheckApi;
 
   Future<String> getNewVersion(String environment) => _updateCheckApi.getNewVersion(environment);
+
+  Future<void> updateApplication() => _updateCheckApi.updateApplication();
+
+  Future<void> tryReloadApplication() => _updateCheckApi.tryReloadApplication();
 }
