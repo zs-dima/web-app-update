@@ -1,0 +1,79 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.gradle/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/build/
+pubspec.lock
+
+# Web related
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Code generation
+**/*.g.dart
+**/*.gr.dart
+**/*.gen.dart
+**/*.freezed.dart
+**/*.g.dart
+**/*.g.java
+**/*.g.kt
+**/*.gr.dart
+**/*.gen.dart
+**/*.freezed.dart
+**/*.select.dart
+**/*.mocks.dart
+**/gen/localization/l10n.dart
+**/gen/localization/intl/messages_??.dart
+**/gen/localization/intl/messages_???.dart
+
+# Database
+**/*.db
+**/*.sqlite
+
+# Logs
+logs/
+coverage/
+
+# GraphQL
+.graphqlconfig
+
+# Flutter Version Manager related
+.fvm/flutter_sdk
+
+coverage/
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release

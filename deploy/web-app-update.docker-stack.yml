@@ -1,0 +1,95 @@
+version: '3.9'
+
+
+x-logging: &loki-logging
+  driver: loki
+  options:
+    max-size: '12m'
+    max-file: '5'
+    loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+    loki-retries: "5"
+    loki-batch-size: "400"
+    loki-pipeline-stages: |
+      - json:
+          expressions:
+            level: level
+            path: path
+            method: method
+            msg: msg
+      - labels:
+          msg: 
+          level:
+          path:
+          method:
+
+
+x-common: &default-keys
+  networks:
+    - public
+    - monitor
+  restart: always
+  security_opt:
+    - no-new-privileges:true
+  logging: *loki-logging
+
+
+x-deploy: &deploy-app
+  mode: replicated
+  replicas: 1
+  restart_policy:
+    condition: on-failure
+  resources:
+    limits:
+      memory: 1024M
+    reservations:
+      memory: 128M
+
+
+x-environment: &default-tz-puid-pgid
+  TZ: $TZ
+  PUID: $PUID
+  PGID: $PGID
+
+
+services:
+  web-app-update:
+    <<: *default-keys
+    hostname: web-app-update
+    image: zsdima/web-app-update:latest
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - NGINX_HOST=web-app-update.$DOMAIN
+      - NGINX_PORT=80
+      - APP_ENVIRONMENT=production      
+
+    deploy:
+      <<: *deploy-app
+      labels:
+        - org.label-schema.group=web-app-update
+        ####################################################################
+        # WebAppUpdate application
+        ####################################################################
+        - traefik.enable=true
+        - traefik.http.routers.web-app-update.rule=Host(`web-app-update.${DOMAIN}`)
+        - traefik.http.routers.web-app-update.entrypoints=https
+        - traefik.http.routers.web-app-update.tls=true
+        # Port traefik needs to route traffic to
+        - traefik.http.routers.web-app-update.service=web-app-update
+        - traefik.http.services.web-app-update.loadbalancer.server.port=80
+        # Enable middleware
+        - traefik.http.routers.web-app-update.middlewares=web-app-update-ratelimit@docker
+        # Middleware rate limit
+        - traefik.http.middlewares.web-app-update-ratelimit.ratelimit.average=100
+        - traefik.http.middlewares.web-app-update-ratelimit.ratelimit.burst=50
+        ####################################################################
+
+
+networks:
+  public:
+    external: true
+    attachable: true
+    driver: overlay
+  monitor:
+    external: false
+
