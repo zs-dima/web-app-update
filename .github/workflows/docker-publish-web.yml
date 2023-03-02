@@ -11,13 +11,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: 🏗️ Build application image
-        run: docker build . --file ./deploy/Dockerfile --tag zsdima/web-app-update:latest
+      - name: 🏗️ Build application image (arm64v8)
+        uses: pguyot/arm-runner-action@v2
+        with:
+          image_additional_mb: 4096
+          base_image: raspios_lite_arm64:latest
+          optimize_image: yes
+          commands: |
+              docker build . --file ./deploy/Dockerfile --tag zsdima/web-app-update:latest
+              echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
+              docker push zsdima/web-app-update:latest
 
-      - name: ✨ Log into registry
-        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
+      #- name: 🏗️ Build application image
+      #  run: docker build . --file ./deploy/Dockerfile --tag zsdima/web-app-update:latest
 
-      - name: 💾 Push images to the Docker registry
-        run: docker push zsdima/web-app-update:latest
+      #- name: ✨ Log into registry
+      #  run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
+
+      #- name: 💾 Push images to the Docker registry
+      #  run: docker push zsdima/web-app-update:latest
