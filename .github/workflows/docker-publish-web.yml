@@ -1,10 +1,6 @@
 name: Deploy Web application
 
 on:
-  push:
-    paths:
-    - 'pubspec.yaml'
-
   workflow_dispatch:
     
 jobs:

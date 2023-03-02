@@ -1,4 +1,4 @@
-name: Deploy Web application
+name: Deploy Web application (arm64v8)
 
 on:
   push:
