@@ -20,7 +20,8 @@ RUN flutter build web --release --no-source-maps \
     --web-renderer canvaskit --base-href /
 
 
-FROM nginx:alpine as production
+#FROM nginx:alpine as production
+FROM arm64v8/nginx:latest as production
 
 COPY --from=build_dart /runtime/ /
 COPY --from=build_dart /app/tool/prepare-app-to-start /app/bin/
