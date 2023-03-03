@@ -6,7 +6,7 @@ class UpdateCheckRepository {
   UpdateCheckRepository({required UpdateCheckApi updateCheckApi}) //
       : _updateCheckApi = updateCheckApi;
 
-  Future<String> getNewVersion(String environment) => _updateCheckApi.getNewVersion(environment);
+  Future<String?> getNewVersion(String environment) => _updateCheckApi.getNewVersion(environment);
 
   Future<void> updateApplication() => _updateCheckApi.updateApplication();
 

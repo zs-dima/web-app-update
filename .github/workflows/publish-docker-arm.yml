@@ -1,10 +1,6 @@
-name: Deploy Web application (arm64v8)
+name: Deploy application container (arm64v8)
 
 on:
-  push:
-    paths:
-    - 'pubspec.yaml'
-
   workflow_dispatch:
     
 jobs:

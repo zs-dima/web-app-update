@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_app_update/core/data/model/version_model.dart';
 
 abstract class UpdateCheckApi {
-  Future<String> getNewVersion(String environment);
+  Future<String?> getNewVersion(String environment);
   Future<void> updateApplication();
   Future<void> tryReloadApplication();
 }
@@ -20,19 +20,21 @@ class UpdateCheckApiImpl implements UpdateCheckApi {
   UpdateCheckApiImpl._internal();
 
   @override
-  Future<String> getNewVersion(String environment) async {
+  Future<String?> getNewVersion(String environment) async {
     final uri = Uri.base.removeFragment().replace(path: '/version.json');
     final response = await http.get(uri);
 
     final versionModel = VersionModel.fromJson(json.decode(response.body));
 
-    if (versionModel.version == null) return '';
+    if (versionModel.version == null) return null;
     return '${versionModel.version}b${versionModel.buildNumber}${environment[0]}';
   }
 
   @override
   Future<void> updateApplication() async {
     final preferences = await SharedPreferences.getInstance();
+
+    // Set flag to reload second time website after application updated
     await preferences.setBool('wait_update', true);
 
     html.window.location.reload();
@@ -44,8 +46,11 @@ class UpdateCheckApiImpl implements UpdateCheckApi {
     final waitUpdate = preferences.getBool('wait_update') ?? false;
     if (!waitUpdate) return;
 
+    // Remove flag to prevent infinite reload
     await preferences.setBool('wait_update', false);
 
+    // Try to reload website second time after application updated,
+    // as first reload updates scripts only
     html.window.location.reload();
   }
 }

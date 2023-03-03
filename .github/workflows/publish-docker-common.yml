@@ -1,4 +1,4 @@
-name: Deploy Web application
+name: Deploy application container
 
 on:
   workflow_dispatch:

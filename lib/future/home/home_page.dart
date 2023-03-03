@@ -2,9 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:web_app_update/core/data/model/environment_model.dart';
+import 'package:web_app_update/core/data/model/app_environment.dart';
 import 'package:web_app_update/core/data/repository/environment_repository.dart';
 import 'package:web_app_update/core/data/repository/update_check_repository.dart';
 
@@ -18,44 +17,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? _appVersion;
-  String? _appEnvironment;
+  late AppEnvironment _appEnvironment;
 
   Future<String> _loadEnvironmentVariables() async {
-    final environmentRepository = context.read<EnvironmentRepository>();
-    final environmentModel = await environmentRepository.loadEnvironmentVariables();
+    _appEnvironment = await context.read<EnvironmentRepository>().loadEnvironmentVariables();
 
-    // You could pass variables with environment.json or --dart-define for debug
-    _appEnvironment = (environmentModel.environment ??
-            const String.fromEnvironment(EnvironmentNames.appEnvironment, defaultValue: 'unknown'))
-        .toLowerCase();
-
-    final appVersion = environmentModel.version ?? const String.fromEnvironment(EnvironmentNames.appVersion);
-
-    if (appVersion.isNotEmpty) {
-      _appVersion = appVersion;
-    } else {
-      final packageInfo = await PackageInfo.fromPlatform();
-      _appVersion = '${packageInfo.version}b${packageInfo.buildNumber}${_appEnvironment![0]}';
-    }
-
+    // Check for update after application loaded
     final updateCheckRepository = context.read<UpdateCheckRepository>();
-    final newVersion = await updateCheckRepository.getNewVersion(_appEnvironment!);
-
-    if (newVersion.isNotEmpty && _appVersion != newVersion) {
+    final newVersion = await updateCheckRepository.getNewVersion(_appEnvironment.environment);
+    if (newVersion != null && _appEnvironment.version != newVersion) {
+      // Try to reload website second time after application updated,
+      // as first reload updates scripts only
       await updateCheckRepository.tryReloadApplication();
     }
 
-    return _appVersion!;
+    return _appEnvironment.version;
   }
 
   Future _checkForUpdate(BuildContext context) async {
     HapticFeedback.mediumImpact().ignore();
 
     final updateCheckRepository = context.read<UpdateCheckRepository>();
-    final newVersion = await updateCheckRepository.getNewVersion(_appEnvironment!);
+    final newVersion = await updateCheckRepository.getNewVersion(_appEnvironment.environment);
 
-    final snackBar = newVersion.isEmpty || _appVersion == newVersion
+    final snackBar = newVersion == null || _appEnvironment.version == newVersion
         ? const SnackBar(content: Text('The latest version already installed'))
         : SnackBar(
             content: Text('New version available: $newVersion, press "Update" to install'),
@@ -84,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                     children: <Widget>[
                       const Text('Environment type:'),
                       Text(
-                        _appEnvironment ?? '',
+                        _appEnvironment.environment,
                         style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                         maxLines: 3,
@@ -93,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 20),
                       const Text('Application version:'),
                       Text(
-                        _appVersion ?? '',
+                        _appEnvironment.version,
                         style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                         maxLines: 3,
@@ -108,7 +93,6 @@ class _HomePageState extends State<HomePage> {
           builder: (context) => FloatingActionButton.extended(
             icon: const Icon(Icons.update),
             onPressed: () => _checkForUpdate(context),
-            tooltip: 'Check for update',
             label: const Text('Check for update'),
           ),
         ),
