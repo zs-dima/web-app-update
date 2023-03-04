@@ -6,7 +6,7 @@ COPY ./tool/ ./tool/
 RUN dart compile exe tool/prepare_app_to_start.dart -o tool/prepare-app-to-start
 
 
-FROM plugfox/flutter:stable-web AS build_web
+FROM korone/flutter-web-builder:latest-arm64 AS build_web
 
 WORKDIR /home
 
