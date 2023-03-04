@@ -6,8 +6,7 @@ COPY ./tool/ ./tool/
 RUN dart compile exe tool/prepare_app_to_start.dart -o tool/prepare-app-to-start
 
 
-FROM korone/flutter-web-builder:latest-arm64 AS build_web
-
+FROM zsdima/flutter:3.7.6 AS build_web
 WORKDIR /home
 
 COPY . .
