@@ -16,6 +16,6 @@ jobs:
           base_image: raspios_lite_arm64:latest
           optimize_image: yes
           commands: |
-              docker build . --file ./deploy/Dockerfile.arm --tag zsdima/web-app-update:latest
+              DOCKER_BUILDKIT=1 docker build . --file ./deploy/Dockerfile.arm --tag zsdima/web-app-update:latest
               echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
               docker push zsdima/web-app-update:latest
