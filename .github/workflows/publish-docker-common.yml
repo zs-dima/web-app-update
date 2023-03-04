@@ -1,4 +1,4 @@
-name: Deploy application container
+name: Deploy application container (amd64)
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
@@ -14,6 +15,6 @@ jobs:
 
       - name: ✨ Log into registry
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
--
+
       - name: 💾 Push images to the Docker registry
         run: docker push zsdima/web-app-update:latest
