@@ -1,0 +1,20 @@
+name: Deploy application container (arm64v8 test)
+
+on:
+  workflow_dispatch:
+    
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: 🏗️ Build application image
+        run: DOCKER_BUILDKIT=1 docker build . --file ./deploy/Dockerfile.arm --tag zsdima/web-app-update:latest
+
+      - name: ✨ Log into registry
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_HUB_LOGIN }} --password-stdin
+
+      - name: 💾 Push images to the Docker registry
+        run: docker push zsdima/web-app-update:latest
